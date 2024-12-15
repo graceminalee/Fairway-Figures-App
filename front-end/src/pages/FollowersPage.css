@@ -1,0 +1,132 @@
+.followers-container {
+    margin-top: 100px;
+    max-width: 1080px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #FCFCFC;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.followers-container h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #5d5fdb;
+}
+
+
+.search-form {
+    display: flex;
+    margin-bottom: 20px;
+    justify-content: center;
+    gap: 10px;
+}
+
+.search-input {
+    flex: 1;
+    max-width: 300px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.search-button {
+    background-color: #5d5fdb;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+    background-color: #3c3a67;
+}
+
+.followers-container h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #444;
+    border-bottom: 2px solid #5d5fdb;
+    padding-bottom: 5px;
+}
+
+.followers-list, .following-list, .search-results {
+    margin-bottom: 20px;
+}
+
+.follower-item, .following-item, .search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    transition: box-shadow 0.3s ease;
+}
+
+.follower-item:hover, .following-item:hover, .search-result-item:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Buttons (Follow/Unfollow) */
+.follow-button, .unfollow-button {
+    padding: 5px 15px;
+    font-size: 14px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.follow-button {
+    background-color: #8adf7e; /*#04A777;*/
+    color: #000000;
+}
+
+.follow-button:hover {
+    background-color: #649f5d;
+    color: #000000;
+}
+
+.unfollow-button {
+    background-color: #F49390;/*#F49390;*/
+    color: #000000;
+}
+
+.unfollow-button:hover {
+    background-color: #b86f6d;
+}
+
+/* Error */
+.error-message {
+    color: #dc3545;
+    background-color: #ffe6e6;
+    padding: 10px;
+    border: 1px solid #dc3545;
+    border-radius: 5px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .followers-container {
+        padding: 10px;
+    }
+
+    .follower-item, .following-item, .search-result-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .follow-button, .unfollow-button {
+        margin-top: 10px;
+    }
+}

@@ -1,0 +1,150 @@
+/* Home.css */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Futura', sans-serif;
+    /* color: #333; */
+}
+
+.home-container {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+
+.home-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('./img/southernhills.JPG') no-repeat center center / cover;
+    
+    filter: brightness(0.6);
+    z-index: -1;
+}
+
+.logo-image-home {
+    width: 150px;  
+    height: auto;  
+    margin-right: 0px; 
+}
+
+
+
+.home-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px 0;
+    background-color: rgba(0, 0, 0, 0.5); 
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#main-title {
+    font-size: 3rem;
+    color: #ffffff;
+    margin: 0;
+}
+
+
+.home-main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.home-main h1 {
+    font-size: 2.5rem;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.home-main p {
+    font-size: 1.2rem;
+    margin: 10px 0 20px;
+    color: #666;
+}
+
+
+.buttonGroup {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.buttonGroup .button {
+    padding: 15px 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(90deg, #657ed4, #5d5fdb);
+    /* background: linear-gradient(90deg, #558B6E, #335c46);  */
+    /* background: #5bbf8a; */
+    /* #558B6E; */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.buttonGroup .button:hover {
+    background: linear-gradient(90deg, #5d5fdb, #657ed4);
+
+}
+
+
+section {
+    margin: 30px 0;
+    padding: 20px;
+}
+
+.about-us, .features, .contact-us {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.about-us h2, .features h2, .contact-us h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: #444;
+    border-bottom: 2px solid #657ed4;
+    display: inline-block;
+}
+
+.features ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.features li {
+    font-size: 1.1rem;
+    color: #555;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+}
+
+/* 
+
+
+.contact-us p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.contact-us h2 {
+    color: #444;
+} */
+

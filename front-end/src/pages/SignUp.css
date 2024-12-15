@@ -1,0 +1,79 @@
+/* Container for the sign-up */
+.sign-up-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+.sign-up-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Error message */
+.error-message {
+    color: #e53e3e;
+    background-color: #fff5f5;
+    border: 1px solid #e53e3e;
+    padding: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Form group for spacing inputs */
+.input-group {
+    margin-bottom: 15px;
+}
+
+/* Input fields */
+.input-field {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/* Input focus */
+.input-field:focus {
+    outline: none;
+    border-color: #4f46e5;
+}
+
+/* Submit button */
+.submit-button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(90deg, #5d5fdb, #657ed4);
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #657ed4;
+    /* background: linear-gradient(90deg, #657ed4, #5d5fdb); */
+    
+
+}
+
+.submit-button:active {
+    background-color: #312e81;
+}
+
+.success-message {
+    color: #38a169;
+    margin-bottom: 16px;
+    text-align: center;
+}

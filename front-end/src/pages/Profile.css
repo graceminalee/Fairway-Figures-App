@@ -1,0 +1,158 @@
+/* Profile.css */
+.profile-container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 32px;
+    background-color: #FCFCFC;
+    
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    /* font-family: 'Roboto', sans-serif; */
+    font-family: 'Futura', sans-serif; 
+    /* font-family: 'Palatino', serif; */
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+
+.edit-button {
+    background-color: #6564DB;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.edit-button:hover {
+    background-color: #3c3a67;
+}
+
+.edit-button:focus {
+    outline: none;
+}
+
+
+.error-message {
+    color: #e53e3e;
+    font-size: 14px;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Profile Pic */
+.profile-picture {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.profile-image {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: inline-block;
+    border: 3px solid #f0f0f0;
+}
+
+.default-picture {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 2px dashed #ddd;
+}
+
+.default-initial {
+    font-size: 56px;
+    color: #888;
+}
+
+/* Info Grid */
+.profile-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .profile-info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.info-label {
+    color: #777;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+.info-value {
+    color: #333;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Bio Section */
+.bio-section {
+    margin-top: 32px;
+}
+
+.bio-text {
+    margin-top: 10px;
+    color: #555;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* Loading */
+.loading {
+    text-align: center;
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 24px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+
+    .edit-button {
+        font-size: 14px;
+    }
+}

@@ -1,0 +1,168 @@
+.club-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #FCFCFC;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+.title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #2C1320;
+}
+
+.subtitle {
+    font-size: 24px;
+    color: #2C1320;
+    margin-bottom: 20px;
+}
+
+/* Form */
+.add-club-form {
+    margin-bottom: 30px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2C1320;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #CDD7D6;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #6564DB;
+}
+
+.toggle-button {
+    /* width: 20%; */
+    margin-bottom: 20px;
+    padding: 14px;
+    background-color: #6564DB;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+/* Button */
+.add-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #6564DB;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+    background-color: #4338CA;
+}
+
+.add-button:active {
+    background-color: #312e81;
+}
+
+/* Error Message */
+.error-message {
+    color: #DB5461;
+    background-color: #FFD6DB;
+    border: 1px solid #DB5461;
+    padding: 10px;
+    margin: 15px 0;
+    text-align: center;
+    border-radius: 6px;
+}
+
+/* Clubs Display */
+.clubs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.club-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #CDD7D6;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.club-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.club-type {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2C1320;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.club-brand {
+    color: #4A4A4A;
+    margin: 5px 0;
+}
+
+.slot-number {
+    color: #6564DB;
+    font-weight: 500;
+    margin: 5px 0;
+}
+
+.no-clubs {
+    text-align: center;
+    color: #666;
+    margin-top: 20px;
+    font-style: italic;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .container {
+    margin: 20px;
+    padding: 20px;
+    }
+    
+    .form-grid {
+    grid-template-columns: 1fr;
+    }
+    
+    .clubs-grid {
+    grid-template-columns: 1fr;
+    }
+}
