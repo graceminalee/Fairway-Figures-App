@@ -50,6 +50,7 @@ Distributed under the MIT License. See LICENSE for more information.
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 To kill a running port: 
+
     sudo lsof -i:5001
     
     sudo kill -9 pid(replace the actual pid)
