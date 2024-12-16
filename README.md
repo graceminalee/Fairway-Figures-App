@@ -14,7 +14,7 @@ This project aims to bridge the gap between golfers and their performance data, 
   License
   Notes
 
-## Installation 
+## Installation:
 
 npm install
 
