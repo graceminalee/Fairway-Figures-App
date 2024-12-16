@@ -17,11 +17,11 @@ This project aims to bridge the gap between golfers and their performance data, 
 ## Installation
 To install: 
 
-npm install
+    npm install
 
-cd front-end npm install
+    cd front-end npm install
 
-cd back-end, npm install
+    cd back-end, npm install
 
 ## Usage Account Management
   Create Account: Sign up with username, email, password, and password confirmation. Upon successful sign up, the user will be directed to the login page.
