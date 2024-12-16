@@ -15,8 +15,8 @@ This project aims to bridge the gap between golfers and their performance data, 
   Notes
 
 ## Installation 
-npm install
-cd front-end, npm install
+npm install,
+cd front-end npm install,
 cd back-end, npm install
 
 ## Usage Account Management
