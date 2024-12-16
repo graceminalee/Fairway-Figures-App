@@ -15,7 +15,6 @@ This project aims to bridge the gap between golfers and their performance data, 
   Notes
 
 ## Installation
-To install: 
 
     npm install
 
@@ -24,19 +23,20 @@ To install:
     cd back-end, npm install
 
 ## Usage Account Management
-  Create Account: Sign up with username, email, password, and password confirmation. Upon successful sign up, the user will be directed to the login page.
-  Login: Enter user credentials to access user profile. Once successful, user will be directed to user's personalized dashboard.
+Create Account: 
+    Sign up with username, email, password, and password confirmation. Upon successful sign up, the user will be directed to the login page.
+    Login: Enter user credentials to access user profile. Once successful, user will be directed to user's personalized dashboard.
 Tracking Golf Rounds
-  Navigate to the Round Input section on the dashboard.
-  Enter user round details: Course, Course Name, State, City, and Date Played. The user will then be taken to the hole by hole input form. Where the user will add the par of the hole, the yardage of the hole, and the score of the hole. 
-  The user may submit the round at any point. Once the user enters the desired amount of holes played, the page will be directed to the stats page, where the users round information will display. Additionally, other round stats will display. 
+    Navigate to the Round Input section on the dashboard.
+    Enter user round details: Course, Course Name, State, City, and Date Played. The user will then be taken to the hole by hole input form. Where the user will add the par of the hole, the yardage of the hole, and the score of the hole. 
+    The user may submit the round at any point. Once the user enters the desired amount of holes played, the page will be directed to the stats page, where the users round information will display. Additionally, other round stats will display. 
 Visualizing Performance
-  Dashboard Widgets: The user will be able to navigate to their proile, add round page, and stats page.
+    Dashboard Widgets: The user will be able to navigate to their proile, add round page, and stats page.
 Connecting with Friends
-  Search Friends: The user will be able to search for friends via search bar. All user name's containing the entered string will display. 
-  Follow: Users can follow other users, which will then populate under the following portion of the page. 
+    Search Friends: The user will be able to search for friends via search bar. All user name's containing the entered string will display. 
+    Follow: Users can follow other users, which will then populate under the following portion of the page. 
 Personalizing the Dashboard
-  Edit Mode: Use the edit button to rearrange dashboard widgets.
+    Edit Mode: Use the edit button to rearrange dashboard widgets.
   Save Layout: Customize and save the widget layout using local storage.
 
 ## Contributing 
