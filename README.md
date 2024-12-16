@@ -15,8 +15,11 @@ This project aims to bridge the gap between golfers and their performance data, 
   Notes
 
 ## Installation 
-npm install,
-cd front-end npm install,
+
+npm install
+
+cd front-end npm install
+
 cd back-end, npm install
 
 ## Usage Account Management
@@ -52,5 +55,5 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 To kill a running port: 
 
     sudo lsof -i:5001
-    
+
     sudo kill -9 pid(replace the actual pid)
