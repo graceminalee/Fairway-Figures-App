@@ -21,18 +21,12 @@ This project aims to bridge the gap between golfers and their performance data, 
 2 Run command:
 
     npm install
-  
-3 Run command
+    
+3 Run command:
 
-    cd front-end 
-
-    npm install
-
-4 Run command 
-
-    cd ../backend 
-
-    npm install
+    cd ../back-end && npm install
+    
+    cd ../back-end && npm install
 
 
 ## Usage Account Management
