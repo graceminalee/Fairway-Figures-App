@@ -16,11 +16,24 @@ This project aims to bridge the gap between golfers and their performance data, 
 
 ## Installation
 
-    npm install
+1 Clone the repo
 
-    cd front-end npm install
+2 Run command:
 
-    cd back-end npm install
+  npm install
+  
+3 Run command
+
+  cd front-end 
+
+  npm install
+
+4 Run command 
+
+  cd ../backend 
+
+  npm install
+
 
 ## Usage Account Management
 Create Account: 
