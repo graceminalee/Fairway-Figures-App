@@ -63,48 +63,22 @@ CREATE TABLE IF NOT EXISTS holes (
     FOREIGN KEY (course_id) REFERENCES courses(course_id),
     FOREIGN KEY (round_id) REFERENCES rounds(round_id),
     UNIQUE(round_id, hole_number)
-);
--- Shots table
-CREATE TABLE IF NOT EXISTS shots (
-    shot_id SERIAL NOT NULL,
-    round_id INTEGER NOT NULL,
-    hole_id INTEGER NOT NULL,
-    shot_number INTEGER NOT NULL,
-    club_used VARCHAR NOT NULL,
-    end_lie VARCHAR(3) NOT NULL, -- 'FW' (fairway), 'RO' (rough), 'BU' (bunker), 'GR' (green), 'IH' (in hole)
-    distance_in INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (shot_id),
-    FOREIGN KEY (round_id) REFERENCES rounds(round_id),
-    FOREIGN KEY (hole_id) REFERENCES holes(hole_id)
+-- );
+-- -- Shots table
+-- CREATE TABLE IF NOT EXISTS shots (
+--     shot_id SERIAL NOT NULL,
+--     round_id INTEGER NOT NULL,
+--     hole_id INTEGER NOT NULL,
+--     shot_number INTEGER NOT NULL,
+--     club_used VARCHAR NOT NULL,
+--     end_lie VARCHAR(3) NOT NULL, -- 'FW' (fairway), 'RO' (rough), 'BU' (bunker), 'GR' (green), 'IH' (in hole)
+--     distance_in INTEGER NOT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     PRIMARY KEY (shot_id),
+--     FOREIGN KEY (round_id) REFERENCES rounds(round_id),
+--     FOREIGN KEY (hole_id) REFERENCES holes(hole_id)
 
-);
-
-
--- INSERT INTO users VALUES (first_name, last_name, username, email, users_password)
--- VALUES 
---     ('John', 'Doe', 'johndoe1', 'johndoe1@ex.com', 'pass'), 
---     ('Jane', 'Doe', 'janedoe1', 'janedoe1@ex.com', 'pass'), 
---     ('Alice', 'Smith', 'alicesmith1', 'alicesmith1@ex.com', 'pass'), 
---     ('Abigail', 'Fork', 'abigailfork1', 'abigailfork1@ex.com', 'pass'), 
---     ('Macy', 'Cooper', 'macycooper1', ',macycooper@ex.com', 'pass'), 
---     ('Sarah', 'Adams', 'sarahadams1', 'sarahadams@ex.com', 'pass'), 
---     ('Bill', 'Reed', 'billreed1', 'billreed@ex.com', 'pass'), 
---     ('Lily', 'Jane', 'lilyjane', 'lilyjane@ex.com', 'pass'), 
---     ('Charlie', 'Miller', 'charliemiller1', 'charliemiller@ex.com', 'pass'), 
---     ('Emily', 'Johnson', 'emilyjohnson1', 'emilyjohnson@ex.com', 'pass'), 
---     ('Elizabeth', 'Collin', 'elizabethcollin1', 'elizabethcollin@ex.com', 'pass'), 
---     ('Michelle', 'Lin', 'michellelin1', 'michellelin@ex.com', 'pass'), 
---     ('Lauren', 'Brown', 'laurenbrown1', 'laurenbrown@ex.com', 'pass'), 
---     ('Lee', 'Davis', 'leedavis1', 'leedavis@ex.com', 'pass'), 
---     ('Dianna', 'Lynn', 'diannalynn1', 'diannalynn@ex.com', 'pass'), 
---     ('Cliff', 'Lande', 'clifflande1', 'clifflande@ex.com', 'pass'), 
---     ('Linda', 'Jones', 'lindajones1', 'lindajones@ex.com', 'pass'), 
---     ('Nate', 'Garcia', 'nategarcia1', 'nategarcia@ex.com', 'pass'), 
---     ('James', 'Jude', 'jamesjude1', 'jamesjude@ex.com', 'pass'), 
---     ('Danny', 'Golding', 'dannygolding1', 'dannygolding@ex.com', 'pass'), 
---     ('Cooper', 'Cooper', 'cooperfisher', 'cooperfisher@ex.com', 'pass'), 
---     ('Brock', 'Lee', 'brocklee1', 'brocklee@ex.com', 'pass'); 
+-- );
 
 
 
