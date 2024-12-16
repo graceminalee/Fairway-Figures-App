@@ -21,8 +21,6 @@ This project aims to bridge the gap between golfers and their performance data, 
 2 Run command:
 
     npm install
-    
-3 Run command:
 
     cd ../back-end && npm install
     
