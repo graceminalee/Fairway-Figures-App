@@ -26,6 +26,9 @@ This project aims to bridge the gap between golfers and their performance data, 
     
     cd ../back-end && npm install
 
+    cp .env.example .env
+
+    cd .. && npm start
 
 ## Usage Account Management
 Create Account: 
