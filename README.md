@@ -20,7 +20,7 @@ This project aims to bridge the gap between golfers and their performance data, 
 
     cd front-end npm install
 
-    cd back-end, npm install
+    cd back-end npm install
 
 ## Usage Account Management
 Create Account: 
