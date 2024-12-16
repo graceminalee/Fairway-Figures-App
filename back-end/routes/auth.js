@@ -80,7 +80,7 @@ try {
     // Generate JWT
     const token = jwt.sign(
         { id: user.rows[0].id, username },
-        'your_jwt_secret',
+        process.env.JWT_SECRET,
         { expiresIn: '24h' }
     );
 
