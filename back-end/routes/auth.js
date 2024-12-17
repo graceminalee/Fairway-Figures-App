@@ -167,40 +167,46 @@ router.post('/add-course-info', auth, async (req, res) => {
     const { courseName, courseState, courseCity } = req.body;
 
     try {
-        // Check if the course already exists
-        const courseCheckQuery = `
-            SELECT course_id 
-            FROM courses 
-            WHERE course_name = $1 AND course_state = $2 AND city = $3
-        `;
-        const courseResult = await pool.query(courseCheckQuery, [courseName, courseState, courseCity]);
+        // First try to get existing course
+        const courseResult = await pool.query(
+            `SELECT course_id 
+             FROM courses 
+             WHERE LOWER(course_name) = LOWER($1) 
+             AND LOWER(course_state) = LOWER($2) 
+             AND LOWER(city) = LOWER($3)`,
+            [courseName, courseState, courseCity]
+        );
 
         if (courseResult.rows.length > 0) {
-            // If the course exists, return the existing course_id
-            return res.status(200).json({
-                message: 'Course already exists',
+            // Course exists, return the existing course_id
+            return res.json({
+                message: 'Using existing course',
                 course_id: courseResult.rows[0].course_id
             });
         }
 
-        // Insert new course into the database if it does not exist
-        const insertQuery = `
-            INSERT INTO courses (course_name, course_state, city) 
-            VALUES ($1, $2, $3) 
-            RETURNING course_id
-        `;
-        const insertResult = await pool.query(insertQuery, [courseName, courseState, courseCity]);
+        // Course doesn't exist, insert new course
+        const newCourse = await pool.query(
+            `INSERT INTO courses (course_name, course_state, city)
+             VALUES ($1, $2, $3)
+             RETURNING course_id`,
+            [courseName, courseState, courseCity]
+        );
 
-        // Return the new course_id
-        res.status(201).json({
-            message: 'Course added successfully!',
-            course_id: insertResult.rows[0].course_id
+        res.json({
+            message: 'New course added successfully',
+            course_id: newCourse.rows[0].course_id
         });
+
     } catch (error) {
-        console.error('Error adding course:', error);
-        res.status(500).json({ error: 'Failed to add course' });
+        console.error('Error in add-course-info:', error);
+        res.status(500).json({ 
+            error: 'Failed to process course information',
+            details: error.message
+        });
     }
 });
+
 
 // Add round info
 router.post('/add-round-info', auth, async (req, res) => {
