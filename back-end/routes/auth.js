@@ -27,70 +27,82 @@ hashPasswords();
 router.post('/sign-up', async (req, res) => {
     try {
         const { firstName, lastName, username, email, password } = req.body;
-        // Check if user exists
+        
+        // Convert username and email to lowercase
+        const lowerUsername = username.toLowerCase();
+        const lowerEmail = email.toLowerCase();
+        
+        // Check if user exists (using lowercase values)
         const userCheck = await pool.query(
             'SELECT * FROM users WHERE username = $1 OR email = $2',
-            [username, email]
+            [lowerUsername, lowerEmail]
         );
+        
         if (userCheck.rows.length > 0) {
             return res.status(400).json({ error: 'Username or email already exists' });
         }
-        // // Hash pass
+        
+        // Hash password
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password , salt);
-        // Create user
+        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        // Create user (using lowercase values)
         const newUser = await pool.query(
             'INSERT INTO users (first_name, last_name, username, email, users_password) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [firstName, lastName, username, email, hashedPassword]
+            [firstName, lastName, lowerUsername, lowerEmail, hashedPassword]
         );
-        // Create account
+        
+        // Create account (using lowercase username)
         await pool.query(
             'INSERT INTO accounts (username) VALUES ($1)',
-            [username]
+            [lowerUsername]
         );
+        
         // Success
         res.status(201).json({ success: 'User created successfully!' });
-
+        
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-
+// Login route
 router.post('/login', async (req, res) => {
-try {
-    const { username, password } = req.body;
-
-    // Check if user exists
-    const user = await pool.query(
-        'SELECT * FROM users WHERE username = $1',
-        [username]
-    );
-
-    if (user.rows.length === 0) {
-        return res.status(400).json({ error: 'Invalid credentials' });
-    }
-
-    // Verify password
-    const validPassword = await bcrypt.compare(password, user.rows[0].users_password); // Find from tables
-    if (!validPassword) {
-        return res.status(400).json({ error: 'Invalid credentials' });
-    }
-
-    // Generate JWT
-    const token = jwt.sign(
-        { id: user.rows[0].id, username },
-        process.env.JWT_SECRET,
-        { expiresIn: '24h' }
-    );
-
-    res.json({ token });
+    try {
+        const { username, password } = req.body;
+        
+        // Convert username to lowercase
+        const lowerUsername = username.toLowerCase();
+        
+        // Check if user exists (using lowercase username)
+        const user = await pool.query(
+            'SELECT * FROM users WHERE username = $1',
+            [lowerUsername]
+        );
+        
+        if (user.rows.length === 0) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+        
+        // Verify password
+        const validPassword = await bcrypt.compare(password, user.rows[0].users_password);
+        if (!validPassword) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+        
+        // Generate JWT (using lowercase username)
+        const token = jwt.sign(
+            { id: user.rows[0].id, username: lowerUsername },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+        
+        res.json({ token });
+        
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
-
-
 // Get Profile Route
 router.get('/profile', auth, async (req, res) => {
 try {
