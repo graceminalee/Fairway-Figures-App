@@ -1,97 +1,169 @@
+body {
+    background-color: #f8f9fa;
+}
+
 .edit-profile-container {
-    margin-top: 100px;
-    max-width: 600px;
+    max-width: 800px;
     margin: 40px auto;
-    padding: 20px;
-    background-color: #FCFCFC;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .edit-profile-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f1f3f5;
+    letter-spacing: -0.5px;
+    text-align: center;
+}
+
+.error-message,
+.success-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 24px;
+    font-weight: 500;
     text-align: center;
 }
 
 .error-message {
     color: #e53e3e;
-    margin-bottom: 16px;
-    text-align: center;
+    background-color: #fff5f5;
+    border: 1px solid #feb2b2;
 }
 
 .success-message {
-    color: #38a169;
-    margin-bottom: 16px;
-    text-align: center;
+    color: #057a55;
+    background-color: #f3faf7;
+    border: 1px solid #84e1bc;
 }
 
 .loading-message {
     text-align: center;
-    margin-top: 40px;
+    font-size: 18px;
+    color: #6564DB;
+    font-weight: 500;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin: 40px auto;
+    max-width: 300px;
 }
 
 .edit-profile-form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 24px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
+    gap: 8px;
 }
 
 .form-group label {
+    color: #6b7280;
+    font-weight: 600;
     font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-group input,
 .form-group textarea {
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 2px solid #e1e4e8;
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #6564DB;
+    box-shadow: 0 0 0 3px rgba(101, 100, 219, 0.1);
 }
 
 .form-group textarea {
-    min-height: 100px;
+    min-height: 120px;
     resize: vertical;
+    line-height: 1.6;
+}
+
+/* Make certain inputs shorter */
+.form-group input[name="phone"],
+.form-group input[name="location"],
+.form-group input[name="homeCourse"] {
+    min-height: 48px;
 }
 
 .button-group {
     display: flex;
     gap: 16px;
+    margin-top: 16px;
+    padding-top: 24px;
+    border-top: 2px solid #f1f3f5;
 }
 
 .save-button,
 .cancel-button {
     flex: 1;
-    padding: 10px;
-    font-size: 14px;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 500;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
+    transition: all 0.2s ease;
 }
 
 .save-button {
     background-color: #6564DB;
-    color: #fff;
+    color: #ffffff;
 }
 
 .save-button:hover {
-    background-color: #3c3a67;
+    background-color: #4b4db3;
+    transform: translateY(-1px);
 }
 
 .cancel-button {
-    background-color: #718096;
-    color: #fff;
+    background-color: #ffffff;
+    color: #4b5563;
+    border: 2px solid #e1e4e8;
 }
 
 .cancel-button:hover {
-    background-color: #4a5568;
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .edit-profile-container {
+        margin: 20px;
+        padding: 24px;
+    }
+
+    .edit-profile-title {
+        font-size: 28px;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .save-button,
+    .cancel-button {
+        width: 100%;
+    }
 }

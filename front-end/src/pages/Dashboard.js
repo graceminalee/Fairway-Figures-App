@@ -21,7 +21,9 @@ const Dashboard = () => {
                 { id: 'course-input', title: 'Add Round', description: 'Enter details about your golf rounds.', link: '/course-input' },
                 { id: 'view-stats', title: 'View Stats', description: 'Review your golf performance stats.', link: '/stats-page' },
                 { id: 'profile', title: 'Profile', description: 'View and edit your profile.', link: '/profile' },
-                // { id: 'friends', title: 'Friends', description: 'Manage your friends and view their updates.', link: '/followers-page' },
+                { id: 'friends', title: 'Friends', description: 'Manage your friends and view their updates.', link: '/followers-page' },
+                { id: 'equipment', title: 'Equipment', description: 'Manage your golf clubs and equipment.', link: '/club-manager' },
+                // Add more widgets here
             ];
     });
 

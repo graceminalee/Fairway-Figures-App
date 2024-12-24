@@ -32,7 +32,7 @@ const EditProfile = () => {
                 const data = await response.json();
                 setFormData({
                     bio: data.bio || '',
-                    location: data.location || '',
+                    home_location: data.home_location || '',
                     phone: data.phone || '',
                     homeCourse: data.home_course || '',
                 });
