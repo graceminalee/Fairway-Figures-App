@@ -185,7 +185,7 @@ router.post('/add-course-info', auth, async (req, res) => {
              FROM courses 
              WHERE LOWER(course_name) = LOWER($1) 
              AND LOWER(course_state) = LOWER($2) 
-             AND LOWER(city) = LOWER($3)`,
+             AND LOWER(course_city) = LOWER($3)`,
             [courseName, courseState, courseCity]
         );
 
@@ -199,7 +199,7 @@ router.post('/add-course-info', auth, async (req, res) => {
 
         // Course doesn't exist, insert new course
         const newCourse = await pool.query(
-            `INSERT INTO courses (course_name, course_state, city)
+            `INSERT INTO courses (course_name, course_state, course_city)
              VALUES ($1, $2, $3)
              RETURNING course_id`,
             [courseName, courseState, courseCity]
@@ -358,7 +358,7 @@ router.get('/user-rounds', auth, async (req, res) => {
                 r.date_played, 
                 c.course_name, 
                 c.course_state AS state, 
-                c.city,
+                c.course_city,
                 (SELECT COUNT(*) 
                 FROM holes h 
                 WHERE h.round_id = r.round_id) AS holes_played,
@@ -389,7 +389,7 @@ router.get('/user-rounds', auth, async (req, res) => {
                 r.course_id = c.course_id
             WHERE 
                 r.username = $1
-                AND r.status != 'canceled'
+                AND r.round_status != 'canceled'
         `;
 
         // Array to hold dynamic query parameters
@@ -442,7 +442,7 @@ router.get('/par-statistics', auth, async (req, res) => {
                     AVG(h.total_shots - h.par) as average_over_under
                 FROM holes h
                 JOIN rounds r ON h.round_id = r.round_id
-                WHERE r.username = $1 AND r.status != 'canceled'
+                WHERE r.username = $1 AND r.round_status != 'canceled'
                 GROUP BY h.par
                 ORDER BY h.par
             )
@@ -598,7 +598,7 @@ router.delete('/delete-round/:roundId', auth, async (req, res) => {
 
         // Update round status to 'canceled'
         const result = await pool.query(
-            'UPDATE rounds SET status = \'canceled\' WHERE round_id = $1 RETURNING *',
+            'UPDATE rounds SET round_status = \'canceled\' WHERE round_id = $1 RETURNING *',
             [roundId]
         );
 
