@@ -44,14 +44,14 @@ CREATE TABLE IF NOT EXISTS rounds (
     course_id INT,
     date_played DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    round_status DEFAULT 'active',
+    round_status VARCHAR DEFAULT 'active',
     PRIMARY KEY(round_id), 
     FOREIGN KEY (course_id) REFERENCES courses(course_id),
     FOREIGN KEY (username) REFERENCES users(username)
 );
 -- Holes table
 CREATE TABLE IF NOT EXISTS holes (
-    hole_id SERIAL NOT NULL,
+    hole_id SERIAL PRIMARY KEY,
     course_id INTEGER NOT NULL,
     round_id INTEGER NOT NULL,
     hole_number INTEGER NOT NULL,
@@ -59,11 +59,42 @@ CREATE TABLE IF NOT EXISTS holes (
     start_yardage INTEGER NOT NULL,
     total_shots INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (hole_id)
+    deleted_at TIMESTAMP,
     FOREIGN KEY (course_id) REFERENCES courses(course_id),
     FOREIGN KEY (round_id) REFERENCES rounds(round_id),
-    UNIQUE(round_id, hole_number)
--- );
+    UNIQUE (round_id, hole_number)
+);
+
+-- Followers table
+CREATE TABLE IF NOT EXISTS followers (
+    follower_username VARCHAR NOT NULL,
+    followed_username VARCHAR NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (follower_username, followed_username),
+    FOREIGN KEY (follower_username) REFERENCES users(username),
+    FOREIGN KEY (followed_username) REFERENCES users(username)
+);
+
+-- Clubs table
+CREATE TABLE IF NOT EXISTS clubs (
+   club_id SERIAL PRIMARY KEY,
+   club_type VARCHAR NOT NULL,
+   brand VARCHAR NOT NULL,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User's Club table
+CREATE TABLE IF NOT EXISTS user_clubs (
+   username VARCHAR NOT NULL,
+   club_id INTEGER NOT NULL,
+   slot_number INTEGER NOT NULL,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (username, slot_number),
+   FOREIGN KEY (username) REFERENCES users(username),
+   FOREIGN KEY (club_id) REFERENCES clubs(club_id),
+   UNIQUE (username, slot_number)
+);
+
 -- -- Shots table
 -- CREATE TABLE IF NOT EXISTS shots (
 --     shot_id SERIAL NOT NULL,
@@ -90,7 +121,7 @@ INSERT INTO users (first_name, last_name, username, email, users_password) VALUE
 ('Emily', 'Johnson', 'emilyjohnson', 'emily.johnson@example.com', '$2a$10$7FjHZGfPgFJMpcv/28gUV.T04ctLanU6lmTSs2CmBUs5esdK1nbqm'), 
 ('Cooper', 'Fisher', 'cooperfisher', 'cooper.fisher@example.com', '$2a$10$7FjHZGfPgFJMpcv/28gUV.T04ctLanU6lmTSs2CmBUs5esdK1nbqm'), -- hashed, use password123 to login
 ('Cliff', 'Lande', 'clifflande', 'cliff.lande@example.com', '$2a$10$7FjHZGfPgFJMpcv/28gUV.T04ctLanU6lmTSs2CmBUs5esdK1nbqm'), -- hashed, use password123 to login
-('Mike', 'Lee', 'mikelee', 'mike.lee@example.com', '$2a$10$7FjHZGfPgFJMpcv/28gUV.T04ctLanU6lmTSs2CmBUs5esdK1nbqm'); -- hashed, use password123 to login
+('Mike', 'Lee', 'mikelee', 'mike.lee@example.com', '$2a$10$7FjHZGfPgFJMpcv/28gUV.T04ctLanU6lmTSs2CmBUs5esdK1nbqm'), -- hashed, use password123 to login
 ('Sarah', 'Connor', 'sarahconnor', 'sarah.connor@example.com', '$2a$10$7FjHZGfPgFJMpcv/28gUV.T04ctLanU6lmTSs2CmBUs5esdK1nbqm'),
 ('Peter', 'Parker', 'peterparker', 'peter.parker@example.com', '$2a$10$7FjHZGfPgFJMpcv/28gUV.T04ctLanU6lmTSs2CmBUs5esdK1nbqm'),
 ('Bruce', 'Wayne', 'brucewayne', 'bruce.wayne@example.com', '$2a$10$7FjHZGfPgFJMpcv/28gUV.T04ctLanU6lmTSs2CmBUs5esdK1nbqm'),
@@ -186,7 +217,7 @@ INSERT INTO accounts (username, bio, home_location, phone, home_course, profile_
 
 
 -- Courses Data
-INSERT INTO courses (course_name, course_state, city) VALUES
+INSERT INTO courses (course_name, course_state, course_city) VALUES
 ('Golden Gate Park Golf Course', 'CA', 'San Francisco'),
 ('Austin Country Club', 'TX', 'Austin'),
 ('Windy City Golf Club', 'IL', 'Chicago'),
@@ -223,8 +254,7 @@ INSERT INTO courses (course_name, course_state, city) VALUES
 ('Blue Hills Country Club', 'MO', 'Kansas City');
 
 -- Rounds Data
-INSERT INTO rounds (username, course_id, date_played, status) VALUES
-('johndoe', (SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), '2024-01-15', 'completed'),
+INSERT INTO rounds (username, course_id, date_played, round_status) VALUES
 ('janesmith', (SELECT course_id FROM courses WHERE course_name = 'Austin Country Club'), '2024-02-20', 'completed'),
 ('mikejohnson', (SELECT course_id FROM courses WHERE course_name = 'Windy City Golf Club'), '2024-03-10', 'completed'),
 ('emilyjohnson', (SELECT course_id FROM courses WHERE course_name = 'Sahalee Country Club'), '2024-04-05', 'completed'),
@@ -233,7 +263,8 @@ INSERT INTO rounds (username, course_id, date_played, status) VALUES
 ('mikelee', (SELECT course_id FROM courses WHERE course_name = 'Manito Golf Club'), '2024-07-20', 'completed');
 
 
-INSERT INTO rounds (username, course_id, date_played, status) VALUES
+INSERT INTO rounds (username, course_id, date_played, round_status) VALUES
+('johndoe', (SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), '2024-01-15', 'completed'),
 ('johndoe', (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), '2024-08-01', 'completed'),
 ('johndoe', (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), '2024-08-15', 'completed'),
 ('johndoe', (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), '2024-08-30', 'completed'),
@@ -245,261 +276,535 @@ INSERT INTO rounds (username, course_id, date_played, status) VALUES
 ('johndoe', (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), '2024-11-15', 'completed'),
 ('johndoe', (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), '2024-11-30', 'completed');
 
-INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots, created_at)
-VALUES 
-(49, 75, 1, 4, 350, 4, CURRENT_TIMESTAMP),
-(49, 75, 2, 3, 200, 3, CURRENT_TIMESTAMP),
-(49, 75, 3, 5, 450, 5, CURRENT_TIMESTAMP),
-(49, 75, 4, 4, 370, 4, CURRENT_TIMESTAMP),
-(49, 75, 5, 3, 160, 3, CURRENT_TIMESTAMP),
-(49, 75, 6, 4, 390, 4, CURRENT_TIMESTAMP),
-(49, 75, 7, 5, 510, 5, CURRENT_TIMESTAMP),
-(49, 75, 8, 3, 180, 3, CURRENT_TIMESTAMP),
-(49, 75, 9, 4, 380, 4, CURRENT_TIMESTAMP),
-(49, 75, 10, 4, 370, 4, CURRENT_TIMESTAMP),
-(49, 75, 11, 5, 440, 5, CURRENT_TIMESTAMP),
-(49, 75, 12, 3, 210, 3, CURRENT_TIMESTAMP),
-(49, 75, 13, 4, 360, 4, CURRENT_TIMESTAMP),
-(49, 75, 14, 4, 380, 4, CURRENT_TIMESTAMP),
-(49, 75, 15, 5, 490, 5, CURRENT_TIMESTAMP),
-(49, 75, 16, 4, 360, 4, CURRENT_TIMESTAMP),
-(49, 75, 17, 3, 190, 3, CURRENT_TIMESTAMP),
-(49, 75, 18, 5, 520, 5, CURRENT_TIMESTAMP);
+
+
+-- johndoe's holes: 
+-- Round 1: Pebble Beach Golf Links
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 1, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 2, 3, 190, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 3, 4, 390, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 4, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 5, 3, 180, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 6, 5, 510, 6),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 7, 3, 170, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 8, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 9, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 10, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 11, 4, 380, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 12, 3, 200, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 13, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 14, 5, 520, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 15, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 16, 3, 180, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 17, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Golden Gate Park Golf Course'), 7, 18, 5, 540, 5);
+
+-- Round 8: Pebble Beach Golf Links
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 1, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 2, 3, 190, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 3, 4, 390, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 4, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 5, 3, 180, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 6, 5, 510, 6),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 7, 3, 170, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 8, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 9, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 10, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 11, 4, 380, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 12, 3, 200, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 13, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 14, 5, 520, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 15, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 16, 3, 180, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 17, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 8, 18, 5, 540, 5);
+
+
+-- Round 9: TPC Scottsdale
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 1, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 2, 3, 190, 3),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 3, 4, 390, 5),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 4, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 5, 3, 180, 3),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 6, 5, 510, 6),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 7, 3, 170, 3),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 8, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 9, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 10, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 11, 4, 380, 5),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 12, 3, 200, 3),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 13, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 14, 5, 520, 5),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 15, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 16, 3, 180, 3),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 17, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 9, 18, 5, 540, 5);
+
+
+-- Round 10: Shadow Creek
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 1, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 2, 3, 190, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 3, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 4, 4, 370, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 5, 3, 180, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 6, 5, 510, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 7, 3, 170, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 8, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 9, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 10, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 11, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 12, 3, 200, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 13, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 14, 5, 520, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 15, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 16, 3, 180, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 17, 4, 400, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 10, 18, 5, 540, 6);
+
+-- Round 11: Quail Hollow Club (course_id 18, round 11)
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 1, 4, 420, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 2, 3, 210, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 3, 5, 490, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 4, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 5, 3, 180, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 6, 4, 410, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 7, 5, 540, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 8, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 9, 4, 380, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 10, 4, 450, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 11, 3, 170, 2),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 12, 5, 530, 6),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 13, 4, 420, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 14, 4, 440, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 15, 3, 190, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 16, 5, 510, 6),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 17, 4, 380, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 11, 18, 4, 430, 5);
+
+-- Round 12: Cherry Hills Country Club (course_id 13, round 12)
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 1, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 2, 3, 200, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 3, 5, 470, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 4, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 5, 3, 190, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 6, 4, 420, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 7, 5, 520, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 8, 4, 380, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 9, 4, 370, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 10, 4, 440, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 11, 3, 160, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 12, 5, 510, 6),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 13, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 14, 4, 430, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 15, 3, 180, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 16, 5, 500, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 17, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 12, 18, 4, 420, 5);
+
+
+-- Round for Torrey Pines Golf Course (course_id 31, round 13)
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 1, 4, 410, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 2, 3, 210, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 3, 5, 480, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 4, 4, 400, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 5, 3, 170, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 6, 4, 430, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 7, 5, 530, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 8, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 9, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 10, 4, 450, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 11, 3, 180, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 12, 5, 520, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 13, 4, 410, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 14, 4, 440, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 15, 3, 200, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 16, 5, 510, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 17, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 13, 18, 4, 430, 3);
+
+-- Round 14: East Lake Golf Club (course_id 11, round 14)
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 1, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 2, 3, 190, 2),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 3, 5, 460, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 4, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 5, 3, 160, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 6, 4, 410, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 7, 5, 510, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 8, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 9, 4, 360, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 10, 4, 430, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 11, 3, 170, 2),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 12, 5, 500, 5),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 13, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 14, 4, 420, 4),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 15, 3, 190, 2),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 16, 5, 490, 5),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 17, 4, 360, 3),
+((SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 14, 18, 4, 410, 4);
 
 
 
-INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots, created_at)
-VALUES 
-(55, 83, 1, 4, 350, 4, CURRENT_TIMESTAMP),
-(55, 83, 2, 3, 190, 3, CURRENT_TIMESTAMP),
-(55, 83, 3, 5, 460, 5, CURRENT_TIMESTAMP),
-(55, 83, 4, 4, 380, 4, CURRENT_TIMESTAMP),
-(55, 83, 5, 3, 160, 3, CURRENT_TIMESTAMP),
-(55, 83, 6, 4, 400, 4, CURRENT_TIMESTAMP),
-(55, 83, 7, 5, 500, 5, CURRENT_TIMESTAMP),
-(55, 83, 8, 3, 180, 3, CURRENT_TIMESTAMP),
-(55, 83, 9, 4, 370, 4, CURRENT_TIMESTAMP),
-(55, 83, 10, 4, 380, 4, CURRENT_TIMESTAMP),
-(55, 83, 11, 5, 450, 5, CURRENT_TIMESTAMP),
-(55, 83, 12, 3, 220, 3, CURRENT_TIMESTAMP),
-(55, 83, 13, 4, 370, 4, CURRENT_TIMESTAMP),
-(55, 83, 14, 4, 380, 4, CURRENT_TIMESTAMP),
-(55, 83, 15, 5, 490, 5, CURRENT_TIMESTAMP),
-(55, 83, 16, 4, 360, 4, CURRENT_TIMESTAMP),
-(55, 83, 17, 3, 190, 3, CURRENT_TIMESTAMP),
-(55, 83, 18, 5, 520, 5, CURRENT_TIMESTAMP);
+-- Round 15: East Lake Golf Club (course_id 11, round 14)
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 1, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 2, 3, 190, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 3, 5, 460, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 4, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 5, 3, 160, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 6, 4, 410, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 7, 5, 510, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 8, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 9, 4, 360, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 10, 4, 430, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 11, 3, 170, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 12, 5, 500, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 13, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 14, 4, 420, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 15, 3, 190, 2),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 16, 5, 490, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 17, 4, 360, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 15, 18, 4, 410, 3);
 
+-- Round 16: 
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 1, 4, 390, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 2, 3, 190, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 3, 5, 460, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 4, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 5, 3, 160, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 6, 4, 410, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 7, 5, 510, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 8, 4, 370, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 9, 4, 360, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 10, 4, 430, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 11, 3, 170, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 12, 5, 500, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 13, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 14, 4, 420, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 15, 3, 190, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 16, 5, 490, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 17, 4, 360, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 16, 18, 4, 410, 4);
 
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(326, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 1, 4, 380, 4, CURRENT_TIMESTAMP),
-(327, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 2, 3, 190, 3, CURRENT_TIMESTAMP),
-(328, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 3, 4, 390, 5, CURRENT_TIMESTAMP),
-(329, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 4, 4, 370, 4, CURRENT_TIMESTAMP),
-(330, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 5, 3, 180, 2, CURRENT_TIMESTAMP),
-(331, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 6, 5, 510, 6, CURRENT_TIMESTAMP),
-(332, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 7, 3, 170, 3, CURRENT_TIMESTAMP),
-(333, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 8, 4, 400, 5, CURRENT_TIMESTAMP),
-(334, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 9, 4, 380, 4, CURRENT_TIMESTAMP),
-(335, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 10, 4, 390, 4, CURRENT_TIMESTAMP),
-(336, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 11, 4, 380, 5, CURRENT_TIMESTAMP),
-(337, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 12, 3, 200, 3, CURRENT_TIMESTAMP),
-(338, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 13, 4, 370, 4, CURRENT_TIMESTAMP),
-(339, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 14, 5, 520, 5, CURRENT_TIMESTAMP),
-(340, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 15, 4, 380, 4, CURRENT_TIMESTAMP),
-(341, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 16, 3, 180, 4, CURRENT_TIMESTAMP),
-(342, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 17, 4, 400, 4, CURRENT_TIMESTAMP),
-(343, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 18, 5, 540, 5, CURRENT_TIMESTAMP);
+-- Round 17: 
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 1, 4, 390, 3),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 2, 3, 190, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 3, 5, 460, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 4, 4, 380, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 5, 3, 160, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 6, 4, 410, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 7, 5, 510, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 8, 4, 370, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 9, 4, 360, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 10, 4, 430, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 11, 3, 170, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 12, 5, 500, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 13, 4, 390, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 14, 4, 420, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 15, 3, 190, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 16, 5, 490, 5),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 17, 4, 360, 4),
+((SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 17, 18, 4, 410, 4);
 
-
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(344, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 1, 4, 360, 5, CURRENT_TIMESTAMP),
-(345, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 2, 4, 380, 4, CURRENT_TIMESTAMP),
-(346, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 3, 5, 500, 6, CURRENT_TIMESTAMP),
-(347, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 4, 3, 185, 3, CURRENT_TIMESTAMP),
-(348, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 5, 4, 370, 4, CURRENT_TIMESTAMP),
-(349, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 6, 4, 390, 5, CURRENT_TIMESTAMP),
-(350, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 7, 3, 175, 2, CURRENT_TIMESTAMP),
-(351, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 8, 4, 400, 4, CURRENT_TIMESTAMP),
-(352, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 9, 5, 510, 5, CURRENT_TIMESTAMP),
-(353, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 10, 4, 385, 4, CURRENT_TIMESTAMP),
-(354, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 11, 4, 380, 4, CURRENT_TIMESTAMP),
-(355, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 12, 3, 190, 4, CURRENT_TIMESTAMP),
-(356, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 13, 5, 520, 5, CURRENT_TIMESTAMP),
-(357, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 14, 4, 390, 4, CURRENT_TIMESTAMP),
-(358, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 15, 4, 375, 5, CURRENT_TIMESTAMP),
-(359, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 16, 3, 180, 3, CURRENT_TIMESTAMP),
-(360, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 17, 4, 400, 4, CURRENT_TIMESTAMP),
-(361, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 18, 5, 530, 6, CURRENT_TIMESTAMP);
-
-
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(362, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 1, 4, 370, 4, CURRENT_TIMESTAMP),
-(363, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 2, 3, 170, 2, CURRENT_TIMESTAMP),
-(364, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 3, 4, 390, 4, CURRENT_TIMESTAMP),
-(365, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 4, 5, 510, 5, CURRENT_TIMESTAMP),
-(366, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 5, 4, 380, 4, CURRENT_TIMESTAMP),
-(367, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 6, 3, 185, 4, CURRENT_TIMESTAMP),
-(368, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 7, 4, 395, 5, CURRENT_TIMESTAMP),
-(369, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 8, 5, 525, 5, CURRENT_TIMESTAMP),
-(370, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 9, 4, 385, 4, CURRENT_TIMESTAMP),
-(371, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 10, 4, 375, 3, CURRENT_TIMESTAMP),
-(372, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 11, 3, 175, 3, CURRENT_TIMESTAMP),
-(373, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 12, 4, 390, 4, CURRENT_TIMESTAMP),
-(374, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 13, 5, 515, 6, CURRENT_TIMESTAMP),
-(375, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 14, 4, 380, 4, CURRENT_TIMESTAMP),
-(376, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 15, 3, 190, 3, CURRENT_TIMESTAMP),
-(377, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 16, 4, 395, 5, CURRENT_TIMESTAMP),
-(378, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 17, 4, 385, 4, CURRENT_TIMESTAMP),
-(379, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 18, 5, 535, 5, CURRENT_TIMESTAMP);
-
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(380, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 1, 4, 380, 4, CURRENT_TIMESTAMP),
-(381, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 2, 4, 390, 5, CURRENT_TIMESTAMP),
-(382, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 3, 3, 170, 3, CURRENT_TIMESTAMP),
-(383, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 4, 4, 385, 4, CURRENT_TIMESTAMP),
-(384, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 5, 5, 520, 6, CURRENT_TIMESTAMP),
-(385, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 6, 3, 175, 2, CURRENT_TIMESTAMP),
-(386, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 7, 4, 395, 4, CURRENT_TIMESTAMP),
-(387, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 8, 4, 380, 5, CURRENT_TIMESTAMP),
-(388, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 9, 5, 530, 5, CURRENT_TIMESTAMP),
-(389, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 10, 4, 375, 4, CURRENT_TIMESTAMP),
-(390, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 11, 4, 385, 4, CURRENT_TIMESTAMP),
-(391, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 12, 3, 180, 4, CURRENT_TIMESTAMP),
-(392, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 13, 4, 390, 4, CURRENT_TIMESTAMP),
-(393, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 14, 5, 515, 5, CURRENT_TIMESTAMP),
-(394, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 15, 4, 380, 4, CURRENT_TIMESTAMP),
-(395, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 16, 3, 185, 3, CURRENT_TIMESTAMP),
-(396, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 17, 4, 395, 5, CURRENT_TIMESTAMP),
-(397, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 18, 5, 525, 5, CURRENT_TIMESTAMP);
+-- Insert holes for round_id 2 (janesmith's round)
+INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots)
+VALUES
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 1, 4, 350, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 2, 3, 175, 3),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 3, 5, 520, 6),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 4, 4, 360, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 5, 3, 170, 2),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 6, 4, 400, 5),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 7, 5, 530, 5),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 8, 3, 185, 3),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 9, 4, 375, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 10, 4, 385, 5),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 11, 5, 510, 6),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 12, 3, 195, 3),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 13, 4, 365, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 14, 4, 380, 5),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 15, 5, 525, 5),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 16, 4, 370, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 17, 3, 180, 4),
+((SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 2, 18, 5, 535, 6);
 
 
 
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(398, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 1, 4, 375, 5, CURRENT_TIMESTAMP),
-(399, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 2, 3, 180, 3, CURRENT_TIMESTAMP),
-(400, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 3, 4, 385, 4, CURRENT_TIMESTAMP),
-(401, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 4, 4, 390, 4, CURRENT_TIMESTAMP),
-(402, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 5, 5, 525, 6, CURRENT_TIMESTAMP),
-(403, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 6, 3, 175, 2, CURRENT_TIMESTAMP),
-(404, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 7, 4, 380, 4, CURRENT_TIMESTAMP),
-(405, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 8, 4, 395, 5, CURRENT_TIMESTAMP),
-(406, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 9, 5, 530, 5, CURRENT_TIMESTAMP),
-(407, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 10, 4, 370, 4, CURRENT_TIMESTAMP),
-(408, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 11, 3, 185, 3, CURRENT_TIMESTAMP),
-(409, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 12, 4, 390, 5, CURRENT_TIMESTAMP),
-(410, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 13, 5, 520, 5, CURRENT_TIMESTAMP),
-(411, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 14, 4, 385, 4, CURRENT_TIMESTAMP),
-(412, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 15, 3, 170, 3, CURRENT_TIMESTAMP),
-(413, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 16, 4, 395, 4, CURRENT_TIMESTAMP),
-(414, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 17, 4, 380, 5, CURRENT_TIMESTAMP),
-(415, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 18, 5, 535, 6, CURRENT_TIMESTAMP);
-
--- Round 6 (Torrey Pines) - round_id 99
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(416, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 1, 4, 380, 4, CURRENT_TIMESTAMP),
-(417, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 2, 4, 385, 5, CURRENT_TIMESTAMP),
-(418, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 3, 3, 180, 3, CURRENT_TIMESTAMP),
-(419, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 4, 4, 390, 4, CURRENT_TIMESTAMP),
-(420, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 5, 5, 530, 6, CURRENT_TIMESTAMP),
-(421, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 6, 4, 375, 4, CURRENT_TIMESTAMP),
-(422, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 7, 3, 175, 2, CURRENT_TIMESTAMP),
-(423, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 8, 4, 395, 5, CURRENT_TIMESTAMP),
-(424, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 9, 5, 520, 5, CURRENT_TIMESTAMP),
-(425, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 10, 4, 385, 4, CURRENT_TIMESTAMP),
-(426, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 11, 3, 190, 4, CURRENT_TIMESTAMP),
-(427, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 12, 4, 380, 4, CURRENT_TIMESTAMP),
-(428, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 13, 5, 525, 5, CURRENT_TIMESTAMP),
-(429, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 14, 4, 370, 3, CURRENT_TIMESTAMP),
-(430, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 15, 4, 385, 5, CURRENT_TIMESTAMP),
-(431, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 16, 3, 185, 3, CURRENT_TIMESTAMP),
-(432, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 17, 4, 390, 4, CURRENT_TIMESTAMP),
-(433, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 18, 5, 535, 6, CURRENT_TIMESTAMP);
+-- INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots, created_at)
+-- VALUES 
+-- (49, 75, 1, 4, 350, 4, CURRENT_TIMESTAMP),
+-- (49, 75, 2, 3, 200, 3, CURRENT_TIMESTAMP),
+-- (49, 75, 3, 5, 450, 5, CURRENT_TIMESTAMP),
+-- (49, 75, 4, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (49, 75, 5, 3, 160, 3, CURRENT_TIMESTAMP),
+-- (49, 75, 6, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (49, 75, 7, 5, 510, 5, CURRENT_TIMESTAMP),
+-- (49, 75, 8, 3, 180, 3, CURRENT_TIMESTAMP),
+-- (49, 75, 9, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (49, 75, 10, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (49, 75, 11, 5, 440, 5, CURRENT_TIMESTAMP),
+-- (49, 75, 12, 3, 210, 3, CURRENT_TIMESTAMP),
+-- (49, 75, 13, 4, 360, 4, CURRENT_TIMESTAMP),
+-- (49, 75, 14, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (49, 75, 15, 5, 490, 5, CURRENT_TIMESTAMP),
+-- (49, 75, 16, 4, 360, 4, CURRENT_TIMESTAMP),
+-- (49, 75, 17, 3, 190, 3, CURRENT_TIMESTAMP),
+-- (49, 75, 18, 5, 520, 5, CURRENT_TIMESTAMP);
 
 
--- Round 7 (East Lake) - round_id 100
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(434, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 1, 4, 375, 4, CURRENT_TIMESTAMP),
-(435, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 2, 3, 170, 2, CURRENT_TIMESTAMP),
-(436, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 3, 4, 385, 5, CURRENT_TIMESTAMP),
-(437, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 4, 4, 390, 4, CURRENT_TIMESTAMP),
-(438, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 5, 5, 520, 5, CURRENT_TIMESTAMP),
-(439, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 6, 3, 175, 3, CURRENT_TIMESTAMP),
-(440, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 7, 4, 380, 4, CURRENT_TIMESTAMP),
-(441, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 8, 4, 395, 5, CURRENT_TIMESTAMP),
-(442, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 9, 5, 530, 6, CURRENT_TIMESTAMP),
-(443, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 10, 4, 370, 4, CURRENT_TIMESTAMP),
-(444, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 11, 3, 185, 3, CURRENT_TIMESTAMP),
-(445, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 12, 4, 390, 4, CURRENT_TIMESTAMP),
-(446, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 13, 5, 525, 5, CURRENT_TIMESTAMP),
-(447, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 14, 4, 380, 4, CURRENT_TIMESTAMP),
-(448, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 15, 3, 180, 4, CURRENT_TIMESTAMP),
-(449, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 16, 4, 385, 4, CURRENT_TIMESTAMP),
-(450, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 17, 4, 390, 5, CURRENT_TIMESTAMP),
-(451, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 18, 5, 535, 5, CURRENT_TIMESTAMP);
 
--- Round 8 (Houston Country Club) - round_id 101
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(452, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 1, 4, 380, 5, CURRENT_TIMESTAMP),
-(453, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 2, 3, 175, 3, CURRENT_TIMESTAMP),
-(454, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 3, 4, 390, 4, CURRENT_TIMESTAMP),
-(455, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 4, 5, 525, 5, CURRENT_TIMESTAMP),
-(456, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 5, 4, 375, 4, CURRENT_TIMESTAMP),
-(457, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 6, 3, 180, 2, CURRENT_TIMESTAMP),
-(458, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 7, 4, 385, 4, CURRENT_TIMESTAMP),
-(459, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 8, 4, 395, 5, CURRENT_TIMESTAMP),
-(460, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 9, 5, 530, 6, CURRENT_TIMESTAMP),
-(461, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 10, 4, 370, 4, CURRENT_TIMESTAMP),
-(462, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 11, 3, 170, 3, CURRENT_TIMESTAMP),
-(463, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 12, 4, 380, 4, CURRENT_TIMESTAMP),
-(464, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 13, 5, 520, 5, CURRENT_TIMESTAMP),
-(465, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 14, 4, 385, 5, CURRENT_TIMESTAMP),
-(466, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 15, 3, 175, 3, CURRENT_TIMESTAMP),
-(467, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 16, 4, 390, 4, CURRENT_TIMESTAMP),
-(468, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 17, 4, 380, 4, CURRENT_TIMESTAMP),
-(469, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 18, 5, 535, 5, CURRENT_TIMESTAMP);
-
--- Round 9 (Hazeltine) - round_id 102
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(470, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 1, 4, 375, 4, CURRENT_TIMESTAMP),
-(471, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 2, 4, 385, 5, CURRENT_TIMESTAMP),
-(472, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 3, 3, 180, 3, CURRENT_TIMESTAMP),
-(473, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 4, 4, 390, 4, CURRENT_TIMESTAMP),
-(474, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 5, 5, 525, 6, CURRENT_TIMESTAMP),
-(475, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 6, 4, 380, 4, CURRENT_TIMESTAMP),
-(476, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 7, 3, 175, 2, CURRENT_TIMESTAMP),
-(477, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 8, 4, 395, 5, CURRENT_TIMESTAMP),
-(478, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 9, 5, 530, 5, CURRENT_TIMESTAMP),
-(479, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 10, 4, 370, 4, CURRENT_TIMESTAMP),
-(480, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 11, 3, 185, 4, CURRENT_TIMESTAMP),
-(481, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 12, 4, 380, 4, CURRENT_TIMESTAMP),
-(482, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 13, 5, 520, 5, CURRENT_TIMESTAMP),
-(483, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 14, 4, 385, 5, CURRENT_TIMESTAMP),
-(484, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 15, 3, 170, 3, CURRENT_TIMESTAMP),
-(485, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 16, 4, 390, 4, CURRENT_TIMESTAMP),
-(486, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 17, 4, 375, 4, CURRENT_TIMESTAMP),
-(487, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 18, 5, 535, 6, CURRENT_TIMESTAMP);
+-- INSERT INTO holes (course_id, round_id, hole_number, par, start_yardage, total_shots, created_at)
+-- VALUES 
+-- (55, 83, 1, 4, 350, 4, CURRENT_TIMESTAMP),
+-- (55, 83, 2, 3, 190, 3, CURRENT_TIMESTAMP),
+-- (55, 83, 3, 5, 460, 5, CURRENT_TIMESTAMP),
+-- (55, 83, 4, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (55, 83, 5, 3, 160, 3, CURRENT_TIMESTAMP),
+-- (55, 83, 6, 4, 400, 4, CURRENT_TIMESTAMP),
+-- (55, 83, 7, 5, 500, 5, CURRENT_TIMESTAMP),
+-- (55, 83, 8, 3, 180, 3, CURRENT_TIMESTAMP),
+-- (55, 83, 9, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (55, 83, 10, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (55, 83, 11, 5, 450, 5, CURRENT_TIMESTAMP),
+-- (55, 83, 12, 3, 220, 3, CURRENT_TIMESTAMP),
+-- (55, 83, 13, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (55, 83, 14, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (55, 83, 15, 5, 490, 5, CURRENT_TIMESTAMP),
+-- (55, 83, 16, 4, 360, 4, CURRENT_TIMESTAMP),
+-- (55, 83, 17, 3, 190, 3, CURRENT_TIMESTAMP),
+-- (55, 83, 18, 5, 520, 5, CURRENT_TIMESTAMP);
 
 
--- Round 10 (Old Bostonian) - round_id 103
-INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
-(488, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 1, 4, 380, 5, CURRENT_TIMESTAMP),
-(489, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 2, 3, 175, 3, CURRENT_TIMESTAMP),
-(490, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 3, 4, 385, 4, CURRENT_TIMESTAMP),
-(491, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 4, 4, 390, 5, CURRENT_TIMESTAMP),
-(492, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 5, 5, 525, 5, CURRENT_TIMESTAMP),
-(493, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 6, 3, 180, 2, CURRENT_TIMESTAMP),
-(494, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 7, 4, 375, 4, CURRENT_TIMESTAMP),
-(495, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 8, 4, 395, 4, CURRENT_TIMESTAMP),
-(496, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 9, 5, 530, 6, CURRENT_TIMESTAMP),
-(497, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 10, 4, 370, 4, CURRENT_TIMESTAMP),
-(498, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 11, 3, 185, 3, CURRENT_TIMESTAMP),
-(499, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 12, 4, 380, 4, CURRENT_TIMESTAMP),
-(500, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 13, 5, 520, 5, CURRENT_TIMESTAMP),
-(501, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 14, 4, 385, 5, CURRENT_TIMESTAMP),
-(502, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 15, 3, 175, 3, CURRENT_TIMESTAMP),
-(503, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 16, 4, 390, 4, CURRENT_TIMESTAMP),
-(504, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 17, 4, 380, 5, CURRENT_TIMESTAMP),
-(505, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 18, 5, 535, 6, CURRENT_TIMESTAMP);
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- ((SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 1, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (327, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 2, 3, 190, 3, CURRENT_TIMESTAMP),
+-- (328, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 3, 4, 390, 5, CURRENT_TIMESTAMP),
+-- (329, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 4, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (330, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 5, 3, 180, 2, CURRENT_TIMESTAMP),
+-- (331, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 6, 5, 510, 6, CURRENT_TIMESTAMP),
+-- (332, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 7, 3, 170, 3, CURRENT_TIMESTAMP),
+-- (333, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 8, 4, 400, 5, CURRENT_TIMESTAMP),
+-- (334, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 9, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (335, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 10, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (336, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 11, 4, 380, 5, CURRENT_TIMESTAMP),
+-- (337, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 12, 3, 200, 3, CURRENT_TIMESTAMP),
+-- (338, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 13, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (339, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 14, 5, 520, 5, CURRENT_TIMESTAMP),
+-- (340, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 15, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (341, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 16, 3, 180, 4, CURRENT_TIMESTAMP),
+-- (342, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 17, 4, 400, 4, CURRENT_TIMESTAMP),
+-- (343, (SELECT course_id FROM courses WHERE course_name = 'Pebble Beach Golf Links'), 94, 18, 5, 540, 5, CURRENT_TIMESTAMP);
+
+
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (344, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 1, 4, 360, 5, CURRENT_TIMESTAMP),
+-- (345, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 2, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (346, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 3, 5, 500, 6, CURRENT_TIMESTAMP),
+-- (347, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 4, 3, 185, 3, CURRENT_TIMESTAMP),
+-- (348, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 5, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (349, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 6, 4, 390, 5, CURRENT_TIMESTAMP),
+-- (350, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 7, 3, 175, 2, CURRENT_TIMESTAMP),
+-- (351, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 8, 4, 400, 4, CURRENT_TIMESTAMP),
+-- (352, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 9, 5, 510, 5, CURRENT_TIMESTAMP),
+-- (353, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 10, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (354, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 11, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (355, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 12, 3, 190, 4, CURRENT_TIMESTAMP),
+-- (356, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 13, 5, 520, 5, CURRENT_TIMESTAMP),
+-- (357, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 14, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (358, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 15, 4, 375, 5, CURRENT_TIMESTAMP),
+-- (359, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 16, 3, 180, 3, CURRENT_TIMESTAMP),
+-- (360, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 17, 4, 400, 4, CURRENT_TIMESTAMP),
+-- (361, (SELECT course_id FROM courses WHERE course_name = 'TPC Scottsdale'), 95, 18, 5, 530, 6, CURRENT_TIMESTAMP);
+
+
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (362, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 1, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (363, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 2, 3, 170, 2, CURRENT_TIMESTAMP),
+-- (364, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 3, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (365, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 4, 5, 510, 5, CURRENT_TIMESTAMP),
+-- (366, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 5, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (367, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 6, 3, 185, 4, CURRENT_TIMESTAMP),
+-- (368, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 7, 4, 395, 5, CURRENT_TIMESTAMP),
+-- (369, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 8, 5, 525, 5, CURRENT_TIMESTAMP),
+-- (370, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 9, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (371, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 10, 4, 375, 3, CURRENT_TIMESTAMP),
+-- (372, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 11, 3, 175, 3, CURRENT_TIMESTAMP),
+-- (373, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 12, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (374, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 13, 5, 515, 6, CURRENT_TIMESTAMP),
+-- (375, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 14, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (376, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 15, 3, 190, 3, CURRENT_TIMESTAMP),
+-- (377, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 16, 4, 395, 5, CURRENT_TIMESTAMP),
+-- (378, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 17, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (379, (SELECT course_id FROM courses WHERE course_name = 'Shadow Creek Golf Course'), 96, 18, 5, 535, 5, CURRENT_TIMESTAMP);
+
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (380, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 1, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (381, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 2, 4, 390, 5, CURRENT_TIMESTAMP),
+-- (382, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 3, 3, 170, 3, CURRENT_TIMESTAMP),
+-- (383, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 4, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (384, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 5, 5, 520, 6, CURRENT_TIMESTAMP),
+-- (385, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 6, 3, 175, 2, CURRENT_TIMESTAMP),
+-- (386, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 7, 4, 395, 4, CURRENT_TIMESTAMP),
+-- (387, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 8, 4, 380, 5, CURRENT_TIMESTAMP),
+-- (388, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 9, 5, 530, 5, CURRENT_TIMESTAMP),
+-- (389, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 10, 4, 375, 4, CURRENT_TIMESTAMP),
+-- (390, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 11, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (391, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 12, 3, 180, 4, CURRENT_TIMESTAMP),
+-- (392, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 13, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (393, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 14, 5, 515, 5, CURRENT_TIMESTAMP),
+-- (394, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 15, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (395, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 16, 3, 185, 3, CURRENT_TIMESTAMP),
+-- (396, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 17, 4, 395, 5, CURRENT_TIMESTAMP),
+-- (397, (SELECT course_id FROM courses WHERE course_name = 'Quail Hollow Club'), 97, 18, 5, 525, 5, CURRENT_TIMESTAMP);
+
+
+
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (398, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 1, 4, 375, 5, CURRENT_TIMESTAMP),
+-- (399, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 2, 3, 180, 3, CURRENT_TIMESTAMP),
+-- (400, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 3, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (401, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 4, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (402, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 5, 5, 525, 6, CURRENT_TIMESTAMP),
+-- (403, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 6, 3, 175, 2, CURRENT_TIMESTAMP),
+-- (404, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 7, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (405, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 8, 4, 395, 5, CURRENT_TIMESTAMP),
+-- (406, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 9, 5, 530, 5, CURRENT_TIMESTAMP),
+-- (407, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 10, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (408, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 11, 3, 185, 3, CURRENT_TIMESTAMP),
+-- (409, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 12, 4, 390, 5, CURRENT_TIMESTAMP),
+-- (410, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 13, 5, 520, 5, CURRENT_TIMESTAMP),
+-- (411, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 14, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (412, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 15, 3, 170, 3, CURRENT_TIMESTAMP),
+-- (413, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 16, 4, 395, 4, CURRENT_TIMESTAMP),
+-- (414, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 17, 4, 380, 5, CURRENT_TIMESTAMP),
+-- (415, (SELECT course_id FROM courses WHERE course_name = 'Cherry Hills Country Club'), 98, 18, 5, 535, 6, CURRENT_TIMESTAMP);
+
+-- -- Round 6 (Torrey Pines) - round_id 99
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (416, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 1, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (417, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 2, 4, 385, 5, CURRENT_TIMESTAMP),
+-- (418, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 3, 3, 180, 3, CURRENT_TIMESTAMP),
+-- (419, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 4, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (420, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 5, 5, 530, 6, CURRENT_TIMESTAMP),
+-- (421, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 6, 4, 375, 4, CURRENT_TIMESTAMP),
+-- (422, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 7, 3, 175, 2, CURRENT_TIMESTAMP),
+-- (423, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 8, 4, 395, 5, CURRENT_TIMESTAMP),
+-- (424, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 9, 5, 520, 5, CURRENT_TIMESTAMP),
+-- (425, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 10, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (426, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 11, 3, 190, 4, CURRENT_TIMESTAMP),
+-- (427, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 12, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (428, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 13, 5, 525, 5, CURRENT_TIMESTAMP),
+-- (429, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 14, 4, 370, 3, CURRENT_TIMESTAMP),
+-- (430, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 15, 4, 385, 5, CURRENT_TIMESTAMP),
+-- (431, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 16, 3, 185, 3, CURRENT_TIMESTAMP),
+-- (432, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 17, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (433, (SELECT course_id FROM courses WHERE course_name = 'Torrey Pines Golf Course'), 99, 18, 5, 535, 6, CURRENT_TIMESTAMP);
+
+
+-- -- Round 7 (East Lake) - round_id 100
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (434, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 1, 4, 375, 4, CURRENT_TIMESTAMP),
+-- (435, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 2, 3, 170, 2, CURRENT_TIMESTAMP),
+-- (436, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 3, 4, 385, 5, CURRENT_TIMESTAMP),
+-- (437, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 4, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (438, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 5, 5, 520, 5, CURRENT_TIMESTAMP),
+-- (439, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 6, 3, 175, 3, CURRENT_TIMESTAMP),
+-- (440, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 7, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (441, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 8, 4, 395, 5, CURRENT_TIMESTAMP),
+-- (442, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 9, 5, 530, 6, CURRENT_TIMESTAMP),
+-- (443, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 10, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (444, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 11, 3, 185, 3, CURRENT_TIMESTAMP),
+-- (445, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 12, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (446, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 13, 5, 525, 5, CURRENT_TIMESTAMP),
+-- (447, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 14, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (448, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 15, 3, 180, 4, CURRENT_TIMESTAMP),
+-- (449, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 16, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (450, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 17, 4, 390, 5, CURRENT_TIMESTAMP),
+-- (451, (SELECT course_id FROM courses WHERE course_name = 'East Lake Golf Club'), 100, 18, 5, 535, 5, CURRENT_TIMESTAMP);
+
+-- -- Round 8 (Houston Country Club) - round_id 101
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (452, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 1, 4, 380, 5, CURRENT_TIMESTAMP),
+-- (453, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 2, 3, 175, 3, CURRENT_TIMESTAMP),
+-- (454, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 3, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (455, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 4, 5, 525, 5, CURRENT_TIMESTAMP),
+-- (456, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 5, 4, 375, 4, CURRENT_TIMESTAMP),
+-- (457, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 6, 3, 180, 2, CURRENT_TIMESTAMP),
+-- (458, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 7, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (459, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 8, 4, 395, 5, CURRENT_TIMESTAMP),
+-- (460, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 9, 5, 530, 6, CURRENT_TIMESTAMP),
+-- (461, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 10, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (462, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 11, 3, 170, 3, CURRENT_TIMESTAMP),
+-- (463, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 12, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (464, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 13, 5, 520, 5, CURRENT_TIMESTAMP),
+-- (465, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 14, 4, 385, 5, CURRENT_TIMESTAMP),
+-- (466, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 15, 3, 175, 3, CURRENT_TIMESTAMP),
+-- (467, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 16, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (468, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 17, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (469, (SELECT course_id FROM courses WHERE course_name = 'Houston Country Club'), 101, 18, 5, 535, 5, CURRENT_TIMESTAMP);
+
+-- -- Round 9 (Hazeltine) - round_id 102
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (470, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 1, 4, 375, 4, CURRENT_TIMESTAMP),
+-- (471, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 2, 4, 385, 5, CURRENT_TIMESTAMP),
+-- (472, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 3, 3, 180, 3, CURRENT_TIMESTAMP),
+-- (473, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 4, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (474, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 5, 5, 525, 6, CURRENT_TIMESTAMP),
+-- (475, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 6, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (476, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 7, 3, 175, 2, CURRENT_TIMESTAMP),
+-- (477, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 8, 4, 395, 5, CURRENT_TIMESTAMP),
+-- (478, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 9, 5, 530, 5, CURRENT_TIMESTAMP),
+-- (479, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 10, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (480, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 11, 3, 185, 4, CURRENT_TIMESTAMP),
+-- (481, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 12, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (482, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 13, 5, 520, 5, CURRENT_TIMESTAMP),
+-- (483, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 14, 4, 385, 5, CURRENT_TIMESTAMP),
+-- (484, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 15, 3, 170, 3, CURRENT_TIMESTAMP),
+-- (485, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 16, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (486, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 17, 4, 375, 4, CURRENT_TIMESTAMP),
+-- (487, (SELECT course_id FROM courses WHERE course_name = 'Hazeltine National Golf Club'), 102, 18, 5, 535, 6, CURRENT_TIMESTAMP);
+
+
+-- -- Round 10 (Old Bostonian) - round_id 103
+-- INSERT INTO holes (hole_id, course_id, round_id, hole_number, par, start_yardage, total_shots, created_at) VALUES
+-- (488, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 1, 4, 380, 5, CURRENT_TIMESTAMP),
+-- (489, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 2, 3, 175, 3, CURRENT_TIMESTAMP),
+-- (490, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 3, 4, 385, 4, CURRENT_TIMESTAMP),
+-- (491, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 4, 4, 390, 5, CURRENT_TIMESTAMP),
+-- (492, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 5, 5, 525, 5, CURRENT_TIMESTAMP),
+-- (493, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 6, 3, 180, 2, CURRENT_TIMESTAMP),
+-- (494, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 7, 4, 375, 4, CURRENT_TIMESTAMP),
+-- (495, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 8, 4, 395, 4, CURRENT_TIMESTAMP),
+-- (496, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 9, 5, 530, 6, CURRENT_TIMESTAMP),
+-- (497, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 10, 4, 370, 4, CURRENT_TIMESTAMP),
+-- (498, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 11, 3, 185, 3, CURRENT_TIMESTAMP),
+-- (499, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 12, 4, 380, 4, CURRENT_TIMESTAMP),
+-- (500, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 13, 5, 520, 5, CURRENT_TIMESTAMP),
+-- (501, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 14, 4, 385, 5, CURRENT_TIMESTAMP),
+-- (502, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 15, 3, 175, 3, CURRENT_TIMESTAMP),
+-- (503, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 16, 4, 390, 4, CURRENT_TIMESTAMP),
+-- (504, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 17, 4, 380, 5, CURRENT_TIMESTAMP),
+-- (505, (SELECT course_id FROM courses WHERE course_name = 'Old Bostonian Golf Club'), 103, 18, 5, 535, 6, CURRENT_TIMESTAMP);
 
 -- Create Followers
 INSERT INTO followers (follower_username, followed_username) VALUES
@@ -516,7 +821,7 @@ INSERT INTO followers (follower_username, followed_username) VALUES
 ('emilyjohnson', 'mikelee'),
 ('cooperfisher', 'emilyjohnson'),
 ('clifflande', 'johndoe'),
-('mikelee', 'janesmith')
+('mikelee', 'janesmith'),
 
 ('tonystark', 'brucewayne'),
 ('brucewayne', 'clarkkent'),
@@ -530,7 +835,7 @@ INSERT INTO followers (follower_username, followed_username) VALUES
 ('barryallen', 'clarkkent'),
 ('dianaprince', 'steverogers'),
 ('arthurcurry', 'brucewayne'),
-('victorstone', 'barryallen')
+('victorstone', 'barryallen'),
 
 ('emmarodriguez', 'tonystark'),
 ('ryanthompson', 'brucewayne'),
@@ -550,7 +855,7 @@ INSERT INTO followers (follower_username, followed_username) VALUES
 ('gracewilson', 'isabellamartinez'),
 ('kevintaylor', 'nathanjones'),
 ('rachelgolf', 'avaharris'),
-('michaelthomas', 'marcuslee')
+('michaelthomas', 'marcuslee'),
 
 
 ('laurenjackson', 'rachelgolf'),
@@ -593,24 +898,11 @@ INSERT INTO followers (follower_username, followed_username) VALUES
 
 -- Clubs
 INSERT INTO clubs (club_type, brand) VALUES
+-- TaylorMade
 ('Driver', 'TaylorMade'),
-('Driver', 'Callaway'),
-('Driver', 'Ping'),
-('Driver', 'Titleist'),
-('Driver', 'Cobra'),
-
 ('3 Wood', 'TaylorMade'),
-('3 Wood', 'Callaway'),
-('3 Wood', 'Ping'),
 ('5 Wood', 'TaylorMade'),
-('5 Wood', 'Titleist'),
-
 ('3H', 'TaylorMade'),
-('4H', 'Callaway'),
-('3H', 'Ping'),
-('4H', 'Titleist'),
-('5H', 'Cobra'),
-
 ('4 Iron', 'TaylorMade'),
 ('5 Iron', 'TaylorMade'),
 ('6 Iron', 'TaylorMade'),
@@ -618,7 +910,12 @@ INSERT INTO clubs (club_type, brand) VALUES
 ('8 Iron', 'TaylorMade'),
 ('9 Iron', 'TaylorMade'),
 ('PW', 'TaylorMade'),
+('Putter', 'TaylorMade'),
 
+-- Callaway
+('Driver', 'Callaway'),
+('3 Wood', 'Callaway'),
+('4H', 'Callaway'),
 ('4 Iron', 'Callaway'),
 ('5 Iron', 'Callaway'),
 ('6 Iron', 'Callaway'),
@@ -627,19 +924,41 @@ INSERT INTO clubs (club_type, brand) VALUES
 ('9 Iron', 'Callaway'),
 ('PW', 'Callaway'),
 
+-- Ping
+('Driver', 'Ping'),
+('3 Wood', 'Ping'),
+('3H', 'Ping'),
+('Putter', 'Ping'),
+
+-- Titleist
+('Driver', 'Titleist'),
+('5 Wood', 'Titleist'),
+('4H', 'Titleist'),
 ('GW', 'Titleist'),
 ('SW', 'Titleist'),
 ('LW', 'Titleist'),
+
+-- Cobra
+('Driver', 'Cobra'),
+('5H', 'Cobra'),
+
+-- Mizuno
+('5 Iron', 'Mizuno'),
+('6 Iron', 'Mizuno'),
+('7 Iron', 'Mizuno'),
+('8 Iron', 'Mizuno'),
+('9 Iron', 'Mizuno'),
+('PW', 'Mizuno'),
+
+-- Cleveland
 ('GW', 'Cleveland'),
 ('SW', 'Cleveland'),
 ('LW', 'Cleveland'),
 
+-- Other Putters
 ('Putter', 'Scotty Cameron'),
 ('Putter', 'Odyssey'),
-('Putter', 'Ping'),
-('Putter', 'TaylorMade'),
 ('Putter', 'Wilson');
-
 
 -- User clubs 
 INSERT INTO user_clubs (username, club_id, slot_number) VALUES
@@ -653,9 +972,9 @@ INSERT INTO user_clubs (username, club_id, slot_number) VALUES
 ('johndoe', (SELECT club_id FROM clubs WHERE club_type = '8 Iron' AND brand = 'TaylorMade'), 8),
 ('johndoe', (SELECT club_id FROM clubs WHERE club_type = '9 Iron' AND brand = 'TaylorMade'), 9),
 ('johndoe', (SELECT club_id FROM clubs WHERE club_type = 'PW' AND brand = 'TaylorMade'), 10),
-('johndoe', (SELECT club_id FROM clubs WHERE club_type = 'GW' AND brand = 'Titleist Vokey'), 11),
-('johndoe', (SELECT club_id FROM clubs WHERE club_type = 'SW' AND brand = 'Titleist Vokey'), 12),
-('johndoe', (SELECT club_id FROM clubs WHERE club_type = 'LW' AND brand = 'Titleist Vokey'), 13),
+('johndoe', (SELECT club_id FROM clubs WHERE club_type = 'GW' AND brand = 'Titleist'), 11),
+('johndoe', (SELECT club_id FROM clubs WHERE club_type = 'SW' AND brand = 'Titleist'), 12),
+('johndoe', (SELECT club_id FROM clubs WHERE club_type = 'LW' AND brand = 'Titleist'), 13),
 ('johndoe', (SELECT club_id FROM clubs WHERE club_type = 'Putter' AND brand = 'Scotty Cameron'), 14);
 
 -- Jane Smith's Bag (Hybrid Setup)
