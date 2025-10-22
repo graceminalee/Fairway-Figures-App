@@ -14,25 +14,13 @@ This project aims to bridge the gap between golfers and their performance data, 
   License
   Notes
 
-## Installation
+## Installation using Docker
 
 1 Clone the repo
 
-2 Run command:
+2 Run command: docker compose up --build
 
-    npm install
-
-    cd front-end && npm install
-    
-    cd ../back-end && npm install
-
-    cp .env.example .env
-
-3 Modify the .env to connect to your database
-
-4 Run command:
-
-    cd .. && npm start
+   
 
 ## Usage Account Management
 Create Account: 
